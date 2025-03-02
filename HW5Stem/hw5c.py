@@ -1,6 +1,6 @@
 # region imports
 import numpy as np
-from scipy.integrate import #JES MISSING CODE
+from scipy.integrate import solve_ivp   #done
 import matplotlib.pyplot as plt
 # endregion
 
@@ -19,49 +19,77 @@ def ode_system(t, X, *params):
     :param params: the list of physical constants for the system.
     :return: The list of derivatives of the state variables.
     '''
+    """
+    Steps for def ode_system:
+    1. Unpack the parameters (placeholder variables for inputs)
+    2. Create state variables to use in equations and for plotting
+    3. List of all equations needed to graph the solution
+    4. Return list of derivatives of state variables
+    """
     #unpack the parameters
+    """Setting up the variables for values"""
     A, Cd, ps, pa, V, beta, rho, Kvalve, m, y=params
 
     #state variables
-    #X[0]=x
-    #X[1]=xdot
-    #X[2]=p1
-    #X[3]=p2
+    #X[0] = x
+    #X[1] = xdot
+    #X[2] = p1
+    #X[3] = p2
 
-    #calculate derivitives
-    #conveniently rename the state variables
-    x = #JES MISSING CODE
-    xdot = #JES MISSING CODE
-    p1 = #JES MISSING CODE
-    p2 = #JES MISSING CODE
+    #calculate derivatives
+    #conveniently rename the state variables   #done
+    """State Variables that will be used to solve the differential equations"""
+    x = X[0]
+    xdot = X[1]
+    p1 = X[2]
+    p2 = X[3]
 
     #use my equations from the assignment
-    xddot = #JES MISSING CODE
-    p1dot = #JES MISSING CODE
-    p2dot = #JES MISSING CODE
+    """The three equations listed in the word doc"""
+    xddot = (p1 - p2) * A / m
+    p1dot = (y * Kvalve * (ps - p1) - rho * A * xdot) * beta / (V * rho)
+    p2dot = -(y * Kvalve * (p2 - pa) - rho * A * xdot) * beta / (V * rho)
 
     #return the list of derivatives of the state variables
-    return [#JES MISSING CODE]
+    return [xdot, xddot, p1dot, p2dot] #done
 
 def main():
+    """
+    Steps for def main:
+    1. Create variable (t) and use np.linspace to make an array
+    2. List values for all necessary variables and state variables
+    3. Solve the initial value problem (sln) with the proper functions/variables
+    4. Unpack results to specific variable names
+    5. Plot result
+    :return:
+    """
     #After some trial and error, I found all the action seems to happen in the first 0.02 seconds
+    """This creates an array"""
     t=np.linspace(0,0.02,200)
-    #myargs=(A, Cd, Ps, Pa, V, beta, rho, Kvalve, m, y)
-    myargs=(4.909E-4, 0.6, 1.4E7,1.0E5,1.473E-4,2.0E9,850.0,2.0E-5,30, 0.002)
+
+    # myargs=(A, Cd, Ps, Pa, V, beta, rho, Kvalve, m, y)
+    """Values for our parameters"""
+    myargs=(4.909E-4, 0.6, 1.4E7,1.0E5,1.473E-4,2.0E9,850.0,2.0E-5,30, 0.002) #values for variables
+
     #because the solution calls for x, xdot, p1 and p2, I make these the state variables X[0], X[1], X[2], X[3]
     #ic=[x=0, xdot=0, p1=pa, p2=pa]
-    pa = #JES MISSING CODE
-    ic = #JES MISSING CODE
+    """creating variables 'pa' & 'ic' to args for state variables and initial conditions"""
+    pa = myargs[3] # done
+    ic = [0, 0, pa, pa] # done # initial conditions
+
     #call odeint with ode_system as callback
-    sln=solve_ivp(#JES MISSING CODE)
+    """Solves ivp for the three ode's"""
+    sln = solve_ivp(ode_system, [t[0], t[-1]], ic, t_eval=t, args=myargs)
 
     #unpack result into meaningful names
-    xvals=sln.y[0]
-    xdot=sln.y[1]
-    p1=sln.y[2]
-    p2=sln.y[3]
+    """Creating new variables for the solutions of the ivp and state variables"""
+    xvals = sln.y[0]
+    xdot = sln.y[1]
+    p1 = sln.y[2]
+    p2 = sln.y[3]
 
     #plot the result
+    """creating the first plot (plotting xdot as a function of time"""
     plt.subplot(2, 1, 1)
     plt.subplot(2, 1, 1)
     plt.plot(t, xvals, 'r-', label='$x$')
@@ -69,10 +97,11 @@ def main():
     plt.legend(loc='upper left')
 
     ax2=plt.twinx()
-    ax2.plot(t, xdot, 'b-', label='$\dot{x}$')
-    plt.ylabel('$\dot{x}$')
+    ax2.plot(t, xdot, 'b-', label=r'$\dot{x}$')   # Corrected an error on this line. python interpreted '\d' as an escape character
+    plt.ylabel(r'$\dot{x}$')
     plt.legend(loc='lower right')
 
+    """Using the solution above, we are plotting p1 and p2 together as a function of time"""
     plt.subplot(2,1,2)
     plt.plot(t, p1, 'b-', label='$P_1$')
     plt.plot(t, p2, 'r-', label='$P_2$')
